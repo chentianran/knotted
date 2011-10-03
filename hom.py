@@ -54,6 +54,7 @@ class HomComplex(nx.DiGraph):
         return image
 
     def hom (self):
+	self.remove_acyclic()			    # first remove all the acyclic subcomplices
         ker = self.ker()                            # the kernel
         img = self.img()                            # the image
         com = ker.intersection(img)                 # the intersection of the two
@@ -70,14 +71,14 @@ class HomComplex(nx.DiGraph):
                     ker_swp[r[1]] = r[0]            # then all the "y" in the kernel will be replaced by "x"
                     img_del.add(r)                  # mark this to be removed
 
-        for x in ker:
-            if x in ker_swp:
-                ker.add(ker_swp[x])
-                ker_del.add(x)
+        for x in ker:				    # for each element in the kernel
+            if x in ker_swp:			    # if it is marked to be swapped
+                ker.add(ker_swp[x])		    # add replace to the kernel
+                ker_del.add(x)			    # mark the old one for removal
 
-        ker.difference_update(ker_del)
-        img.difference_update(img_del)
-        return (ker,img)
+        ker.difference_update(ker_del)		    # remove extra elements from the kernel
+        img.difference_update(img_del)		    # remove extra elements from the image
+        return (ker,img)			    # return kernel mod image
 
     def hom_string (self):
         ker, img = self.hom()
@@ -129,28 +130,15 @@ class HomCmd (cmd.Cmd):
         sys.exit()
 
 H = HomComplex()
-H.bound('x','y')
-H.bound('z','x')
-H.bound('z','w')
-H.bound('x','u')
-H.bound('w','u')
-H.bound('w','y')
+#H.bound('x','y')
+#H.bound('z','x')
+#H.bound('z','w')
+#H.bound('x','u')
+#H.bound('w','u')
+#H.bound('w','y')
 
-H.draw_png ('hom.png')
+#H.draw_png ('hom.png')
 
 shell = HomCmd(H)
 shell.cmdloop()
-
-#H.remove_acyclic()
-
-#H.show()
-#plt.show()
-
-#nx.draw_graphviz(H)
-#nx.write_dot(H,'file.dot')
-
-#print H.nodes()
-
-print "hom: ", H.hom_string()
-
 
