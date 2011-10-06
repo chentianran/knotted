@@ -49,10 +49,10 @@ class HomComplex(nx.DiGraph):
         image = set()
         for n in self.nodes_iter():                 # for each node
             s = self.successors(n)
-            if len(s) == 1:                         # if this node goes to nothing (zero)
-                image.add(s[0])                     #
-            elif len(s) > 1:
-                image.add(tuple(s))
+            if len(s) == 1:                         # if this node goes just one thing
+                image.add(s[0])                     # then that thing is in the image
+            elif len(s) > 1:                        # if this node goes to a sum of things
+                image.add(tuple(s))                 # form the sum as a tuple, and the sum is in the image
         return image
 
     def hom (self):
@@ -153,49 +153,4 @@ class HomComplex(nx.DiGraph):
         A = nx.to_agraph(H)
         A.layout(prog='dot')
         A.draw(filename)
-
-import sys, readline, cmd
-class HomCmd (cmd.Cmd):
-    
-    __H = None
-
-    def __init__ (self, H):
-        cmd.Cmd.__init__ (self)
-        self.__H = H
-        self.prompt = ':'
-
-    def do_bound (self, line):
-        l = line.split()
-        if len(l) == 2:
-            self.__H.bound(l[0],l[1])
-
-    def do_ker (self, line):
-        print self.__H.ker()
-
-    def do_img (self, line):
-        print self.__H.img()
-
-    def do_hom (self, line):
-        print self.__H.hom_string()
-
-    def do_clear (self, line):
-        self.__H.clear()
-
-    def do_EOF (self, line):
-        sys.exit()
-
-H = HomComplex()
-H.bound('x','a')
-H.bound('x','b')
-H.bound('y','a')
-H.bound('y','b')
-H.bound('z','a')
-H.bound('z','b')
-#H.hom()
-print H.hom_string()
-
-#H.draw_png ('hom.png')
-
-#shell = HomCmd(H)
-#shell.cmdloop()
 
