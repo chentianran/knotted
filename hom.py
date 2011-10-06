@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import itertools as iter
+from string import *
+from numpy import *
 
 class HomComplex(nx.DiGraph):
 
@@ -54,7 +56,7 @@ class HomComplex(nx.DiGraph):
         return image
 
     def hom (self):
-	self.remove_acyclic()			    # first remove all the acyclic subcomplices
+	#self.remove_acyclic()			    # first remove all the acyclic subcomplices
         ker = self.ker()                            # the kernel
         img = self.img()                            # the image
         com = ker.intersection(img)                 # the intersection of the two
@@ -78,16 +80,66 @@ class HomComplex(nx.DiGraph):
 
         ker.difference_update(ker_del)		    # remove extra elements from the kernel
         img.difference_update(img_del)		    # remove extra elements from the image
+
+        ker_sums = []                               # the list of sums
+        for x in ker:
+            if x.__class__ == tuple:                # if it is a sum
+                ker_sums.append(x)                  # add it to the list of sums
+
+        ker_vars = list(set(iter.chain(*ker)))      # list of variables appeared in the kernel
+        ker_dict = {}
+        i = 0
+        for v in ker_vars:
+            ker_dict[v] = i
+            i += 1
+        n = len (ker_vars)                          # the number of variables (the dimension of the space)
+        m = len (ker_sums)                          # the number of sums (the number of vectors)
+        M = zeros([m,n], dtype=int16)
+        i = 0
+        for x in ker_sums:
+            for c in x:
+                M[i,ker_dict[c]] = 1
+            i += 1
+
+        k = 0
+        for j in range(min(n,m)):                   # for each column
+            if M[k,j] == 0:
+                for i in range(k+1,m):              # for each row below
+                    if M[i,j] != 0:
+                        M[ [i,j] ] = M[ [j,i] ]     # swap the i-th and j-th row
+            if M[k,j] != 0:
+                for i in range(k+1,m):              # for each row below
+                    if M[i,j] != 0:
+                        M[i] = (M[i] + M[k]) % 2    # eliminate
+                k += 1
+
+        new_sums = []
+        for i in range(m):
+            if M[i].sum() > 0:                      # if this row is not all zero
+                s = []
+                for j in range(n):                  # for each column
+                    if M[i,j] != 0:
+                        s.append (ker_vars[j])
+                new_sums.append (tuple(s))
+
+        ker.difference_update (set(ker_sums))       # remove the old sums
+        ker.update (set(new_sums))                  # add back the new lin-indep sums
+
+        print M
+        print new_sums
+
         return (ker,img)			    # return kernel mod image
 
     def hom_string (self):
         ker, img = self.hom()
         s = ''
         for k in ker:
+            s += '<'
             if k.__class__ == tuple:
-                s += '<' + reduce (lambda x, y: x + '+' + y, k, '') + '>'
+                s += join(list(k),'+')
             else:
-                s += '<' + str(k) + '>'
+                s += str(k)
+            s += '>'
         if len(img) > 0:
             s += '/'
             for k in img:
@@ -126,19 +178,24 @@ class HomCmd (cmd.Cmd):
     def do_hom (self, line):
         print self.__H.hom_string()
 
+    def do_clear (self, line):
+        self.__H.clear()
+
     def do_EOF (self, line):
         sys.exit()
 
 H = HomComplex()
-#H.bound('x','y')
-#H.bound('z','x')
-#H.bound('z','w')
-#H.bound('x','u')
-#H.bound('w','u')
-#H.bound('w','y')
+H.bound('x','a')
+H.bound('x','b')
+H.bound('y','a')
+H.bound('y','b')
+H.bound('z','a')
+H.bound('z','b')
+#H.hom()
+print H.hom_string()
 
 #H.draw_png ('hom.png')
 
-shell = HomCmd(H)
-shell.cmdloop()
+#shell = HomCmd(H)
+#shell.cmdloop()
 
