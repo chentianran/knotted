@@ -11,9 +11,13 @@ class HomShell (cmd.Cmd):
         self.prompt = ':'
 
     def do_bound (self, line):
-        l = line.split()
-        if len(l) == 2:
-            self.__H.bound(l[0],l[1])
+        arg = line.partition('=')
+        print arg
+        if arg[1] == '=':
+            terms = arg[2].split('+')
+            print terms
+            for t in terms:
+                self.__H.bound(arg[0],t)
 
     def do_ker (self, line):
         print self.__H.ker()
