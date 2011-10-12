@@ -31,18 +31,30 @@ class HomComplex(nx.DiGraph):
     def ker (self):
         kernel = set()
         possible = []
+
         for n in self.nodes_iter():                 # for each node
             if self.out_degree(n) == 0:             # if this node goes to nothing (zero)
                 kernel.add(n)                       # then it is in the kernel
             else:                                   # if this node goes to something
                 possible.append(n)                  # then it may be a summand of something that goes to zero
-        for p in iter.combinations(possible,2):     # for each pair in the possible pool
-            s0 = self.successors(p[0])
-            s1 = self.successors(p[1])
-            s0.sort()
-            s1.sort()
-            if s0 == s1:
-                kernel.add(p)                       # then (p0 + p1) is in the kernel
+
+	for c in range(2,len(possible)+1):	    # next we will check the sum of 2, 3... terms
+	    for p in iter.combinations(possible,c): # for each combination in the possible pool
+		img_dict = {}			    # dictionary to keep track of the times each image appear
+		for pi in p:			    # for each term in this sum
+		    si = self.successors(pi)	    # the image of the ith term
+		    for s in si:		    # for each successor
+			if img_dict.has_key(s):
+			    img_dict[s] += 1
+			else:
+			    img_dict[s] = 1
+		in_ker = True
+		for im in img_dict:
+		    if 0 != (img_dict[im] % 2):
+			in_ker = False
+			break
+		if in_ker:
+		    kernel.add(p)                   # then the sum is in the kernel
         return kernel                               # return the kernel
 
     def img (self):
@@ -125,9 +137,6 @@ class HomComplex(nx.DiGraph):
         ker.difference_update (set(ker_sums))       # remove the old sums
         ker.update (set(new_sums))                  # add back the new lin-indep sums
 
-        print M
-        print new_sums
-
         return (ker,img)			    # return kernel mod image
 
     def hom_string (self):
@@ -150,7 +159,7 @@ class HomComplex(nx.DiGraph):
         return s
 
     def draw_png (self, filename):
-        A = nx.to_agraph(H)
+        A = nx.to_agraph(self)
         A.layout(prog='dot')
         A.draw(filename)
 
