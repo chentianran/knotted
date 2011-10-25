@@ -1,5 +1,6 @@
 import sys, readline, cmd
 import homcomplex
+from subprocess import call
 
 class HomShell (cmd.Cmd):
     
@@ -32,6 +33,7 @@ class HomShell (cmd.Cmd):
 
     def do_draw (self, line):
         self.__H.draw_png('hom.png')
+	call ('eog ./hom.png', shell=True)
 
     def do_EOF (self, line):
         sys.exit()
