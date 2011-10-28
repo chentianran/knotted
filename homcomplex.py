@@ -9,6 +9,7 @@ class HomComplex(nx.DiGraph):
     def __init__ (self):
 	nx.DiGraph.__init__(self)
 	self.L_dict = {}
+	self.levels = {}
 
     def bound(self, x, y):
         self.add_node(x)
@@ -35,32 +36,34 @@ class HomComplex(nx.DiGraph):
         kernel = set()
         possible = []
 
+	in_ker = {}				    # this dictionary keeps track of the objects already in kernel
         for n in self.nodes_iter():                 # for each node
             if self.out_degree(n) == 0:             # if this node goes to nothing (zero)
                 kernel.add(n)                       # then it is in the kernel
-            else:                                   # if this node goes to something
-                possible.append(n)                  # then it may be a summand of something that goes to zero
+		in_ker[n] = 1			    # mark this to be in kernel
 
-	sum_in_ker = {}				    # this dictionary keeps track of the sums already in kernel
-	for c in range(2,len(possible)+1):	    # next we will check the sum of 2, 3... terms
-	    for p in iter.combinations(possible,c): # for each sum in the possible pool
-		if not sum_in_ker.has_key(p):	    # if the sum is not already in the kernel
-		    img_dict = {}		    # dictionary to keep track of the times each image appear
-		    for pi in p:		    # for each term in this sum
-			si = self.successors(pi)    # the image of the ith term
-			for s in si:		    # for each successor
-			    if img_dict.has_key(s):
-				img_dict[s] += 1
-			    else:
-				img_dict[s] = 1
-		    in_ker = True
-		    for im in img_dict:
-			if 0 != (img_dict[im] % 2):
-			    in_ker = False
-			    break
-		    if in_ker:
-			kernel.add(p)               # then the sum is in the kernel
-			sum_in_ker[p] = 1	    # mark that sum to be in kernel already
+	for L in self.levels.keys():		    # for each level
+	    level = self.levels[L]
+	    for c in range (2, len(level) + 1):
+		for p in iter.combinations(level,c):# for each sum in the possible pool
+		    if p not in in_ker:		    # if this sum is not already in the kernel
+			img_dict = {}		    # dictionary to keep track of the times each image appear
+			for pi in p:		    # for each term in this sum
+			    si = self.successors(pi)# the image of the ith term
+			    for s in si:	    # for each term in the image
+				if s in img_dict:
+				    img_dict[s]+=1
+				else:
+				    img_dict[s]=1
+			still_in = True
+			for im in img_dict:
+			    if 0 != (img_dict[im] % 2):
+				still_in = False
+				break
+			if still_in:
+			    kernel.add(p)           # then the sum is in the kernel
+			    in_ker[p] = 1	    # mark that sum to be in kernel already
+	print 'kernel: ', kernel
         return kernel                               # return the kernel
 
     def img (self):
@@ -75,6 +78,7 @@ class HomComplex(nx.DiGraph):
 
     def hom (self):
 	#self.remove_acyclic()			    # first remove all the acyclic subcomplices
+	self.assign_level()
         ker = self.ker()                            # the kernel
         img = self.img()                            # the image
         com = ker.intersection(img)                 # the intersection of the two
@@ -170,7 +174,7 @@ class HomComplex(nx.DiGraph):
         A.draw(filename)
 
     def check_L(self,n):
-	if self.L_dict.has_key(n):
+	if n in self.L_dict:
 	    return self.L_dict[n]
 	for s in self.successors(n):
 	    s_L = self.check_L(s)
@@ -179,9 +183,14 @@ class HomComplex(nx.DiGraph):
 	return None
 	
     def set_L (self, n, L):
-	self.L_dict[n] = L
-	for s in self.successors(n):
-	    self.set_L (s, L-1)
+	if not self.L_dict.has_key(n):
+	    self.L_dict[n] = L
+	    for s in self.successors(n):
+		self.set_L (s, L-1)
+	    if not self.levels.has_key(L):
+		self.levels[L] = [n]
+	    else:
+		self.levels[L].append(n)
 
     def assign_L (self, n):
 	if not self.L_dict.has_key(n):
@@ -189,15 +198,19 @@ class HomComplex(nx.DiGraph):
 	    if None == L:
 		L = 0
 	    self.set_L (n, L)
-		
+
+    def assign_level(self):
+	ns = nx.algorithms.dag.topological_sort (self)
+	for n in ns:
+	    self.assign_L(n)
 
 H = HomComplex()
-H.bound(1,2)
-H.bound(1,3)
-H.bound(1,5)
-H.bound(2,4)
-H.bound(3,4)
-H.bound(6,4)
+H.bound('a','b')
+H.bound('a','c')
+H.bound('a','d')
+H.bound('b','f')
+H.bound('c','f')
+H.bound('e','f')
 #H[1].has_key('level')
 #H[2].has_key('level')
 #H[3].has_key('level')
@@ -212,10 +225,12 @@ H.bound(6,4)
 #H[3]['level']=0
 #H[4]['level']=0
 
-#L = nx.algorithms.dag.topological_sort_recursive(H)
 #L.reverse()
 #print L
-H.assign_L(6)
-H.assign_L(1)
-print H.L_dict
+#H.assign_L(6)
+#H.assign_L(1)
+H.assign_level()
+print H.hom_string()
+#print H.L_dict
+#rint H.levels
 

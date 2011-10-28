@@ -35,6 +35,9 @@ class HomShell (cmd.Cmd):
         self.__H.draw_png('hom.png')
 	call ('eog ./hom.png', shell=True)
 
+    def do_level (self, line):
+	print self.__H.L_dict
+
     def do_EOF (self, line):
         sys.exit()
 
