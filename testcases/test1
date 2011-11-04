@@ -1,0 +1,9 @@
+bound a=d+e
+bound b=c+d
+bound e=f
+bound d=g
+bound c=f+g
+bound i=j
+bound m=n+k
+bound r=k
+

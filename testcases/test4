@@ -1,0 +1,7 @@
+bound a=c+d+e
+bound b=d+e+f
+bound f=h+g
+bound e=h+g
+bound d=h+g
+bound c=h+g
+

@@ -1,0 +1,6 @@
+bound b=c+d
+bound a=d+e
+bound c=g+f
+bound d=g
+bound e=f
+

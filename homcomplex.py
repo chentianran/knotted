@@ -19,17 +19,22 @@ class HomComplex(nx.DiGraph):
     def show(self):
         nx.draw(self)
 
+    def clean(self):
+	self.clear()
+	self.L_dict.clear()
+	self.levels.clear()
+
     def remove_acyclic(self):
         cont = True
         while (cont):
             cont = False
             for n in self.nodes_iter():
-                if self.out_degree(n) == 1:         # if nothing leave this node
-                    succ = self.neighbors(n)[0]     # successor
+                if self.out_degree(n) == 1:         # if the father has just one son
+                    succ = self.neighbors(n)[0]     # successor: the son
                     if self.out_degree(succ) == 0:  # if the successor has no boundary
                         self.remove_node(succ)      # then we have an acyclic subcomplex
                         self.remove_node(n)         # remove both
-                        cont = True                 # we should run through this again
+                        #cont = True                 # we should run through this again
                         break                       # done
 
     def ker (self):
@@ -48,13 +53,19 @@ class HomComplex(nx.DiGraph):
 		for p in iter.combinations(level,c):# for each sum in the possible pool
 		    if p not in in_ker:		    # if this sum is not already in the kernel
 			img_dict = {}		    # dictionary to keep track of the times each image appear
+			meaningless_sum = False
 			for pi in p:		    # for each term in this sum
+			    if self.out_degree(pi) == 0: # if one term in the sum is going no where
+				meaningless_sum = True		    # then this sum is meaningless
+				break
 			    si = self.successors(pi)# the image of the ith term
 			    for s in si:	    # for each term in the image
 				if s in img_dict:
 				    img_dict[s]+=1
 				else:
 				    img_dict[s]=1
+			if meaningless_sum:
+			    continue
 			still_in = True
 			for im in img_dict:
 			    if 0 != (img_dict[im] % 2):
@@ -63,7 +74,6 @@ class HomComplex(nx.DiGraph):
 			if still_in:
 			    kernel.add(p)           # then the sum is in the kernel
 			    in_ker[p] = 1	    # mark that sum to be in kernel already
-	print 'kernel: ', kernel
         return kernel                               # return the kernel
 
     def img (self):
@@ -203,34 +213,4 @@ class HomComplex(nx.DiGraph):
 	ns = nx.algorithms.dag.topological_sort (self)
 	for n in ns:
 	    self.assign_L(n)
-
-H = HomComplex()
-H.bound('a','b')
-H.bound('a','c')
-H.bound('a','d')
-H.bound('b','f')
-H.bound('c','f')
-H.bound('e','f')
-#H[1].has_key('level')
-#H[2].has_key('level')
-#H[3].has_key('level')
-#H[4].has_key('level')
-#print H.neighbors(1)
-#print H.neighbors(2)
-#print H.neighbors(3)
-#print H.neighbors(4)
-#H.assign_level(1,0)
-#H[1]['level']=0
-#H[2]['level']=0
-#H[3]['level']=0
-#H[4]['level']=0
-
-#L.reverse()
-#print L
-#H.assign_L(6)
-#H.assign_L(1)
-H.assign_level()
-print H.hom_string()
-#print H.L_dict
-#rint H.levels
 

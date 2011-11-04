@@ -29,7 +29,7 @@ class HomShell (cmd.Cmd):
         print self.__H.hom_string()
 
     def do_clear (self, line):
-        self.__H.clear()
+        self.__H.clean()
 
     def do_draw (self, line):
         self.__H.draw_png('hom.png')
@@ -37,6 +37,9 @@ class HomShell (cmd.Cmd):
 
     def do_level (self, line):
 	print self.__H.L_dict
+
+    def do_acyclic (self, line):
+	self.__H.remove_acyclic()
 
     def do_EOF (self, line):
         sys.exit()
