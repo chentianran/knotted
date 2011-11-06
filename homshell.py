@@ -1,14 +1,15 @@
+#!/usr/bin/python
+
 import sys, readline, cmd
 import homcomplex
 from subprocess import call
 
 class HomShell (cmd.Cmd):
     
-    __H = None
-
-    def __init__ (self, H):
+    def __init__ (self, H, view=None):
         cmd.Cmd.__init__ (self)
         self.__H = H
+        self.__view = view
         self.prompt = ''
 
     def do_bound (self, line):
@@ -32,8 +33,11 @@ class HomShell (cmd.Cmd):
         self.__H.clean()
 
     def do_draw (self, line):
-        self.__H.draw_png('hom.png')
-	call ('eog ./hom.png', shell=True)
+        if self.__view:
+            self.__H.draw_png('hom.png')
+            self.__view.update ('hom.png')
+
+            #call ('eog ./hom.png', shell=True)
 
     def do_level (self, line):
 	print self.__H.L_dict
@@ -44,6 +48,7 @@ class HomShell (cmd.Cmd):
     def do_EOF (self, line):
         sys.exit()
 
-H = homcomplex.HomComplex()
-shell = HomShell(H)
-shell.cmdloop()
+if __name__ == '__main__':
+    H = homcomplex.HomComplex()
+    shell = HomShell(H)
+    shell.cmdloop()

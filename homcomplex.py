@@ -34,8 +34,28 @@ class HomComplex(nx.DiGraph):
                     if self.out_degree(succ) == 0:  # if the successor has no boundary
                         self.remove_node(succ)      # then we have an acyclic subcomplex
                         self.remove_node(n)         # remove both
-                        #cont = True                 # we should run through this again
+                        cont = True                 # we should run through this again
                         break                       # done
+
+    def meaningful_sum (self, s):
+        for t in s:		                    # for each term in this sum
+            if self.out_degree(t) == 0:             # if one term in the sum is going no where
+                return False                        # then this sum is meaningless
+        return True                                 # if every term has a boundary, then the sum is meaningful
+
+    def sum_in_ker (self, s):
+        img_dict = {}		                    # dictionary to keep track of the times each image appear
+        for t in s:		                    # for each term in this sum
+            t_img = self.successors (t)                # the image of the ith term
+            for ti in t_img:	                    # for each term in the image
+                if ti in img_dict:
+                    img_dict[ti] += 1
+                else:
+                    img_dict[ti]  = 1
+        for im in img_dict:
+            if 0 != (img_dict[im] % 2):             # if the coefficients of any image does not add up to zero
+                return False                        # then this sum is not in the kernel
+        return True
 
     def ker (self):
         kernel = set()
@@ -48,32 +68,14 @@ class HomComplex(nx.DiGraph):
 		in_ker[n] = 1			    # mark this to be in kernel
 
 	for L in self.levels.keys():		    # for each level
-	    level = self.levels[L]
-	    for c in range (2, len(level) + 1):
+	    level = self.levels[L]                  # nodes in this level
+	    for c in range (2, len(level) + 1):     # for each possible sum length
 		for p in iter.combinations(level,c):# for each sum in the possible pool
-		    if p not in in_ker:		    # if this sum is not already in the kernel
-			img_dict = {}		    # dictionary to keep track of the times each image appear
-			meaningless_sum = False
-			for pi in p:		    # for each term in this sum
-			    if self.out_degree(pi) == 0: # if one term in the sum is going no where
-				meaningless_sum = True		    # then this sum is meaningless
-				break
-			    si = self.successors(pi)# the image of the ith term
-			    for s in si:	    # for each term in the image
-				if s in img_dict:
-				    img_dict[s]+=1
-				else:
-				    img_dict[s]=1
-			if meaningless_sum:
-			    continue
-			still_in = True
-			for im in img_dict:
-			    if 0 != (img_dict[im] % 2):
-				still_in = False
-				break
-			if still_in:
-			    kernel.add(p)           # then the sum is in the kernel
-			    in_ker[p] = 1	    # mark that sum to be in kernel already
+                    if self.meaningful_sum(p):      # if the sum is indeed meaningful
+                        if p not in in_ker:	    # if this sum is not already in the kernel
+                            if self.sum_in_ker(p):  # if the sum is in kernel
+                                kernel.add(p)       # then add it to the kernel
+                                in_ker[p] = 1	    # mark that sum to be in kernel already
         return kernel                               # return the kernel
 
     def img (self):
@@ -87,11 +89,13 @@ class HomComplex(nx.DiGraph):
         return image
 
     def hom (self):
-	#self.remove_acyclic()			    # first remove all the acyclic subcomplices
-	self.assign_level()
+	self.remove_acyclic()			    # first remove all the acyclic subcomplices
+	self.assign_level()                         # assign levels
+
         ker = self.ker()                            # the kernel
         img = self.img()                            # the image
         com = ker.intersection(img)                 # the intersection of the two
+
         ker.difference_update(com)                  # remove the intersection from the kernel
         img.difference_update(com)                  # remove the intersection from the image
 
