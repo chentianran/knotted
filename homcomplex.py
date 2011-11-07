@@ -163,25 +163,6 @@ class HomComplex(nx.DiGraph):
 
         return (ker,img)			    # return kernel mod image
 
-    def hom_string (self):
-        ker, img = self.hom()
-        s = ''
-        for k in ker:
-            s += '<'
-            if k.__class__ == tuple:
-                s += join(list(k),'+')
-            else:
-                s += str(k)
-            s += '>'
-        if len(img) > 0:
-            s += '/'
-            for k in img:
-                if k.__class__ == tuple:
-                    s += '<' + reduce (lambda x, y: x + '+' + y, k, '') + '>'
-                else:
-                    s += '<' + str(k) + '>'
-        return s
-
     def draw_png (self, filename):
         A = nx.to_agraph(self)
         A.layout(prog='dot')
