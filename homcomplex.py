@@ -6,10 +6,11 @@ from numpy import *
 
 class HomComplex(nx.DiGraph):
 
-    def __init__ (self):
-	nx.DiGraph.__init__(self)
+    def __init__ (self, data=None):
+	nx.DiGraph.__init__(self, data)
 	self.L_dict = {}
 	self.levels = {}
+        self.components = []
 
     def bound(self, x, y):
         self.add_node(x)
@@ -89,6 +90,16 @@ class HomComplex(nx.DiGraph):
         return image
 
     def hom (self):
+        if not nx.is_weakly_connected(self):
+            all_ker = set()
+            all_img = set()
+            for c in nx.weakly_connected_component_subgraphs(self):
+                sub = HomComplex(data=c)
+                k, i = sub.hom()
+                all_ker = all_ker | k
+                all_img = all_img | i
+            return (all_ker, all_img)
+
 	self.remove_acyclic()			    # first remove all the acyclic subcomplices
 	self.assign_level()                         # assign levels
 

@@ -6,10 +6,9 @@ from subprocess import call
 
 class HomShell (cmd.Cmd):
     
-    def __init__ (self, H, view=None):
+    def __init__ (self, H):
         cmd.Cmd.__init__ (self)
         self.__H = H
-        self.__view = view
         self.prompt = ''
 
     def do_bound (self, line):
@@ -27,17 +26,14 @@ class HomShell (cmd.Cmd):
         print self.__H.img()
 
     def do_hom (self, line):
-        print self.__H.hom_string()
+        print self.__H.hom()
 
     def do_clear (self, line):
         self.__H.clean()
 
     def do_draw (self, line):
-        if self.__view:
-            self.__H.draw_png('hom.png')
-            self.__view.update ('hom.png')
-
-            #call ('eog ./hom.png', shell=True)
+        self.__H.draw_png('hom.png')
+        call ('eog ./hom.png', shell=True)
 
     def do_level (self, line):
 	print self.__H.L_dict
