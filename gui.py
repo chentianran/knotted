@@ -67,7 +67,11 @@ class Viewer(wx.App):
                 name = src.strip()
                 terms = line.split('+')
                 for t in terms:
-                    self.H.bound (name, t.strip())
+                    s, sep, v = t.partition('*')
+                    if '*' == sep:
+                        self.H.bound_with (name, v.strip(), scalar=s.strip())
+                    else:
+                        self.H.bound (name, t.strip())
                 self.onView()
 
         self.cmd_input.SetValue('')

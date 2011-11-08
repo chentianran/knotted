@@ -4,6 +4,13 @@ import itertools as iter
 from string import *
 from numpy import *
 
+class Scale:
+
+    def __init__ (val, scalar = 1):
+        value = val
+        scalar = scalar
+
+
 class HomComplex(nx.DiGraph):
 
     def __init__ (self, data=None):
@@ -11,11 +18,28 @@ class HomComplex(nx.DiGraph):
 	self.L_dict = {}
 	self.levels = {}
         self.components = []
+        self.color_use = ['blue','green','red']
+        self.color_map = {}
+
+    def scalar_color (self, s):
+        if s in self.color_map:
+            return self.color_map[s]
+        else:
+            color = self.color_use.pop()
+            self.color_map[s] = color
+            return color
 
     def bound(self, x, y):
         self.add_node(x)
         self.add_node(y)
         self.add_edge(x,y)
+
+    def bound_with(self, x, y, scalar):
+        self.add_node(x)
+        self.add_node(y)
+        self.add_edge(x,y)
+        self[x][y]['label'] = scalar
+        self[x][y]['color'] = self.scalar_color(scalar)
 
     def show(self):
         nx.draw(self)
