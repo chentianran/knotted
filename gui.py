@@ -61,6 +61,10 @@ class Viewer(wx.App):
             self.result_tex = hom2tex (ker, img)
             self.onResult()
 
+	elif 'reduce' == cmd:
+	    self.H.reduce()
+	    self.onView()
+	    
         else:
             src, sep, line = cmd.partition('~')
             if '~' == sep:

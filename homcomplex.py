@@ -18,6 +18,18 @@ def is_simple_rel (r):
 		    return True
     return False
     
+def swap_var (e, swp):
+    if isinstance (e, Scale):
+	return Scale (swap_var(e.value, swp), e.scalar)
+    elif isinstance (e, tuple):
+	r = []
+	for x in e:
+	    r.append (swap_var(x,swp))
+	return tuple(r)
+    elif e in swp:			    # if it is marked to be swapped
+	return swp[e]
+    return e
+
 
 class HomComplex(nx.DiGraph):
 
@@ -93,7 +105,7 @@ class HomComplex(nx.DiGraph):
     def sum_in_ker (self, s):
         img_dict = {}		                    # dictionary to keep track of the times each image appear
         for t in s:		                    # for each term in this sum
-            t_img = self.successors (t)                # the image of the ith term
+            t_img = self.succ_of (t)                # the image of the ith term
             for ti in t_img:	                    # for each term in the image
                 if ti in img_dict:
                     img_dict[ti] += 1
@@ -156,22 +168,39 @@ class HomComplex(nx.DiGraph):
         ker.difference_update(com)                  # remove the intersection from the kernel
         img.difference_update(com)                  # remove the intersection from the image
 
-        ker_swp = {}
-        ker_del = set()
+        var_swp = {}				    # the dictionary for change of variables
+        #ker_del = set()
         img_del = set()
         
         for r in img:                               # for each element in the image
 	    if is_simple_rel (r):		    # if it represents a simple relation of the form "x = y"
-		ker_swp[r[1]] = r[0]		    # then all the "y" in the kernel will be replaced by "x"
+		var_swp[r[1]] = r[0]		    # then all the "y" in the kernel will be replaced by "x"
 		img_del.add(r)			    # mark this to be removed
 
-        for x in ker:				    # for each element in the kernel
-            if x in ker_swp:			    # if it is marked to be swapped
-                ker.add(ker_swp[x])		    # add replace to the kernel
-                ker_del.add(x)			    # mark the old one for removal
-
-        ker.difference_update(ker_del)		    # remove extra elements from the kernel
         img.difference_update(img_del)		    # remove extra elements from the image
+
+	ker_swp = set()
+	img_swp = set()
+
+	for x in ker:
+	    ker_swp.add (swap_var(x,var_swp))
+	for x in img:
+	    img_swp.add (swap_var(x,var_swp))
+	ker = ker_swp
+	img = img_swp
+
+        #for x in ker:				    # for each element in the kernel
+        #    if x in ker_swp:			    # if it is marked to be swapped
+        #        ker.add(ker_swp[x])		    # add replace to the kernel
+        #        ker_del.add(x)			    # mark the old one for removal
+
+        #for x in img:				    # for each element in the kernel
+        #    if x in ker_swp:			    # if it is marked to be swapped
+        #        ker.add(ker_swp[x])		    # add replace to the kernel
+        #        ker_del.add(x)			    # mark the old one for removal
+
+        #ker.difference_update(ker_del)		    # remove extra elements from the kernel
+        #img.difference_update(img_del)		    # remove extra elements from the image
 
         ker_sums = []                               # the list of sums
         for x in ker:
