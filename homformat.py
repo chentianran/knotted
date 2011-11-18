@@ -1,4 +1,5 @@
 from string import *
+from homcomplex import *
 
 def hom2str (ker, img):
     s = ''
@@ -17,8 +18,10 @@ def set2str (x):
     return s
 
 def sym2str (x):
-    if x.__class__ == tuple:
+    if isinstance (x, tuple):
         return join(list(k),'+')
+    elif isinstance (x, Scale):
+        return x.scalar + '*' + sym2tex(x.value)
     else:
         return str(x)
 
@@ -40,7 +43,10 @@ def set2tex (x):
     return join (r1, r'\oplus ')
 
 def sym2tex (x):
-    if x.__class__ == tuple:
-        return join(list(x),'+')
+    if isinstance (x, tuple):
+        return join (map (sym2tex, list(x)), '+')
+        #return join(list(x),'+')
+    elif isinstance (x, Scale):
+        return x.scalar + '\cdot ' + sym2tex(x.value)
     else:
         return str(x)

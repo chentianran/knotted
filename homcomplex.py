@@ -6,17 +6,25 @@ from numpy import *
 
 class Scale:
 
-    def __init__ (val, scalar = 1):
-        value = val
-        scalar = scalar
+    def __init__ (self, val, scalar = 1):
+        self.value = val
+        self.scalar = scalar
 
+def is_simple_rel (r):
+    if isinstance (r, tuple):			# if it is a sum
+	if len(r) == 2:				# if the relation is of the form "x = y"
+	    if not isinstance(r[0],Scale):
+		if not isinstance(r[1],Scale):
+		    return True
+    return False
+    
 
 class HomComplex(nx.DiGraph):
 
     def __init__ (self, data=None):
-	nx.DiGraph.__init__(self, data)
-	self.L_dict = {}
-	self.levels = {}
+        nx.DiGraph.__init__(self, data)
+        self.L_dict = {}
+        self.levels = {}
         self.components = []
         self.color_use = ['blue','green','red']
         self.color_map = {}
@@ -41,26 +49,40 @@ class HomComplex(nx.DiGraph):
         self[x][y]['label'] = scalar
         self[x][y]['color'] = self.scalar_color(scalar)
 
+    def succ_of (self, x):
+        ss = []
+        for y in self.successors(x):
+            if 'label' in self[x][y]:
+                label = self[x][y]['label']
+                ss.append (Scale (val=y, scalar=label))
+            else:
+                ss.append (y)
+        return ss
+                
     def show(self):
         nx.draw(self)
 
     def clean(self):
-	self.clear()
-	self.L_dict.clear()
-	self.levels.clear()
+        self.clear()
+        self.L_dict.clear()
+        self.levels.clear()
 
+    def is_terminal (self, x):
+        return self.out_degree(x) == 0
+        
     def remove_acyclic(self):
         cont = True
         while (cont):
             cont = False
-            for n in self.nodes_iter():
-                if self.out_degree(n) == 1:         # if the father has just one son
-                    succ = self.neighbors(n)[0]     # successor: the son
-                    if self.out_degree(succ) == 0:  # if the successor has no boundary
-                        self.remove_node(succ)      # then we have an acyclic subcomplex
-                        self.remove_node(n)         # remove both
-                        cont = True                 # we should run through this again
-                        break                       # done
+            for n in self.nodes_iter():             # for each node
+                if self.out_degree(n) == 1:         # if the node has just one son
+                    succ = self.succ_of (n)         # successor: the son
+                    if not isinstance(succ,Scale):  # as long as the son is not a scaling product
+                        if self.is_terminal(succ):  # if the son has no leads to nothing
+                            self.remove_node(succ)  # then we have an acyclic subcomplex
+                            self.remove_node(n)     # remove both
+                            cont = True             # we should run through this again
+                            break                   # done
 
     def meaningful_sum (self, s):
         for t in s:		                    # for each term in this sum
@@ -86,16 +108,16 @@ class HomComplex(nx.DiGraph):
         kernel = set()
         possible = []
 
-	in_ker = {}				    # this dictionary keeps track of the objects already in kernel
+        in_ker = {}				    # this dictionary keeps track of the objects already in kernel
         for n in self.nodes_iter():                 # for each node
-            if self.out_degree(n) == 0:             # if this node goes to nothing (zero)
+            if self.is_terminal(n):                 # if this node goes to nothing (zero)
                 kernel.add(n)                       # then it is in the kernel
-		in_ker[n] = 1			    # mark this to be in kernel
+                in_ker[n] = 1			    # mark this to be in kernel
 
-	for L in self.levels.keys():		    # for each level
-	    level = self.levels[L]                  # nodes in this level
-	    for c in range (2, len(level) + 1):     # for each possible sum length
-		for p in iter.combinations(level,c):# for each sum in the possible pool
+        for L in self.levels.keys():		    # for each level
+            level = self.levels[L]                  # nodes in this level
+            for c in range (2, len(level) + 1):     # for each possible sum length
+                for p in iter.combinations(level,c):# for each sum in the possible pool
                     if self.meaningful_sum(p):      # if the sum is indeed meaningful
                         if p not in in_ker:	    # if this sum is not already in the kernel
                             if self.sum_in_ker(p):  # if the sum is in kernel
@@ -106,7 +128,7 @@ class HomComplex(nx.DiGraph):
     def img (self):
         image = set()
         for n in self.nodes_iter():                 # for each node
-            s = self.successors(n)
+            s = self.succ_of(n)
             if len(s) == 1:                         # if this node goes just one thing
                 image.add(s[0])                     # then that thing is in the image
             elif len(s) > 1:                        # if this node goes to a sum of things
@@ -124,8 +146,8 @@ class HomComplex(nx.DiGraph):
                 all_img = all_img | i
             return (all_ker, all_img)
 
-	self.remove_acyclic()			    # first remove all the acyclic subcomplices
-	self.assign_level()                         # assign levels
+        self.remove_acyclic()			    # first remove all the acyclic subcomplices
+        self.assign_level()                         # assign levels
 
         ker = self.ker()                            # the kernel
         img = self.img()                            # the image
@@ -139,10 +161,9 @@ class HomComplex(nx.DiGraph):
         img_del = set()
         
         for r in img:                               # for each element in the image
-            if r.__class__ == tuple:                # if it is a relation
-                if len(r) == 2:                     # if the relation is of the form "x = y"
-                    ker_swp[r[1]] = r[0]            # then all the "y" in the kernel will be replaced by "x"
-                    img_del.add(r)                  # mark this to be removed
+	    if is_simple_rel (r):		    # if it represents a simple relation of the form "x = y"
+		ker_swp[r[1]] = r[0]		    # then all the "y" in the kernel will be replaced by "x"
+		img_del.add(r)			    # mark this to be removed
 
         for x in ker:				    # for each element in the kernel
             if x in ker_swp:			    # if it is marked to be swapped
