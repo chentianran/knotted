@@ -38,7 +38,7 @@ class HomComplex(nx.DiGraph):
         self.L_dict = {}
         self.levels = {}
         self.components = []
-        self.color_use = ['blue','green','red']
+        self.color_use = ['gray', 'orange', 'pink', 'blue','green','red']
         self.color_map = {}
 
     def scalar_color (self, s):
@@ -82,6 +82,12 @@ class HomComplex(nx.DiGraph):
     def is_terminal (self, x):
         return self.out_degree(x) == 0
         
+    def is_invertible (self, src, dst):
+	if 'label' in self[src][dst]:
+	    return False
+	else:
+	    return True
+
     def remove_acyclic(self):
         cont = True
         while (cont):
@@ -96,6 +102,46 @@ class HomComplex(nx.DiGraph):
                             cont = True             # we should run through this again
                             break                   # done
 
+    def shrink_edge (self, src, dst):
+	succ = self.successors   (src)		    # the point want to inherit the out-edges of the source
+	pred = self.predecessors (dst)		    # the point want to inherit the in-edges of the destination
+	dot  = str(src) + '-' + str(dst)	    # the new "dot" node representing the shrinked edge
+	for p in pred:
+	    if p != src:
+		for s in succ:
+		    if s != dst:
+			c = ''
+			if 'label' in self[src][s]:
+			    if c:
+				c += '.'
+			    c += self[src][s]['label']
+			if 'label' in self[p][dst]:
+			    if c:
+				c += '.'
+			    c += self[p][dst]['label']
+			if self.has_edge (p, s):
+			    c += '#'
+			    if 'label' in self[p][s]:
+				c += self[p][s]['label']
+			    else:
+				c += '1'
+			if c:
+			    self.bound_with (p, s, c)
+			else:
+			    self.bound (p, s)
+	self.remove_node (src)
+	self.remove_node (dst)
+
+    def reduce (self):
+        cont = True
+        while (cont):
+            cont = False
+            for n in self.nodes_iter():             # for each node
+		for s in self.successors(n):	    # for each sucessor of n
+		    if self.is_invertible(n,s):	    # if the edge is invertible
+			self.shrink_edge(n,s)	    # shrink that edge to a point
+			return
+	
     def meaningful_sum (self, s):
         for t in s:		                    # for each term in this sum
             if self.out_degree(t) == 0:             # if one term in the sum is going no where
@@ -188,19 +234,6 @@ class HomComplex(nx.DiGraph):
 	    img_swp.add (swap_var(x,var_swp))
 	ker = ker_swp
 	img = img_swp
-
-        #for x in ker:				    # for each element in the kernel
-        #    if x in ker_swp:			    # if it is marked to be swapped
-        #        ker.add(ker_swp[x])		    # add replace to the kernel
-        #        ker_del.add(x)			    # mark the old one for removal
-
-        #for x in img:				    # for each element in the kernel
-        #    if x in ker_swp:			    # if it is marked to be swapped
-        #        ker.add(ker_swp[x])		    # add replace to the kernel
-        #        ker_del.add(x)			    # mark the old one for removal
-
-        #ker.difference_update(ker_del)		    # remove extra elements from the kernel
-        #img.difference_update(img_del)		    # remove extra elements from the image
 
         ker_sums = []                               # the list of sums
         for x in ker:
