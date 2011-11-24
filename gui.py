@@ -22,7 +22,7 @@ class Viewer(wx.App):
 
         self.cmd_input.SetFocus()
         self.frame.Show()
- 
+
     def createWidgets(self):
         img1 = wx.EmptyImage(600,500)
         img2 = wx.EmptyImage(600,100)
@@ -65,6 +65,19 @@ class Viewer(wx.App):
 	    self.H.reduce()
 	    self.onView()
 	    
+	elif 'read' == cmd:
+	    for line in open('input','r').readlines():
+		src, sep, val = line.partition('~')
+		if '~' == sep:
+		    name = src.strip()
+		    terms = val.split('+')
+		    for t in terms:
+			s, sep, v = t.partition('*')
+			if '*' == sep:
+			    self.H.bound_with (name, v.strip(), scalar=s.strip())
+			else:
+			    self.H.bound (name, t.strip())
+		    self.onView()
         else:
             src, sep, line = cmd.partition('~')
             if '~' == sep:

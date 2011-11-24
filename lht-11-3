@@ -1,0 +1,10 @@
+zb ~ u*za + zc + yb
+zd ~ v*za + zc + yd
+xb ~ u*yb + u*xa + xc
+xd ~ u*yd + v*xa + xc
+za ~ ya
+zc ~ yc
+yb ~ u*ya + yc
+yd ~ v*ya + yc
+xa ~ u*ya
+xc ~ u*yc

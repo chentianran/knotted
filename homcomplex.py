@@ -38,16 +38,19 @@ class HomComplex(nx.DiGraph):
         self.L_dict = {}
         self.levels = {}
         self.components = []
-        self.color_use = ['gray', 'orange', 'pink', 'blue','green','red']
+        self.color_use = ['yellow', 'orange', 'pink', 'blue','green','red']
         self.color_map = {}
 
     def scalar_color (self, s):
         if s in self.color_map:
             return self.color_map[s]
         else:
-            color = self.color_use.pop()
-            self.color_map[s] = color
-            return color
+	    if len(self.color_use) > 0:
+		color = self.color_use.pop()
+		self.color_map[s] = color
+		return color
+	    else:
+		return 'gray'
 
     def bound(self, x, y):
         self.add_node(x)
@@ -61,6 +64,14 @@ class HomComplex(nx.DiGraph):
         self[x][y]['label'] = scalar
         self[x][y]['color'] = self.scalar_color(scalar)
 
+    def get_coef (self, src, dst):
+	if self.has_edge (src, dst):
+	    if 'label' in self[src][dst]:
+		return self[src][dst]['label']
+	    else:
+		return 1
+	return None
+	
     def succ_of (self, x):
         ss = []
         for y in self.successors(x):
@@ -103,44 +114,29 @@ class HomComplex(nx.DiGraph):
                             break                   # done
 
     def shrink_edge (self, src, dst):
+	dot  = str(src) + '-' + str(dst)	    # the new "dot" node representing the shrinked edge
 	succ = self.successors   (src)		    # the point want to inherit the out-edges of the source
 	pred = self.predecessors (dst)		    # the point want to inherit the in-edges of the destination
-	dot  = str(src) + '-' + str(dst)	    # the new "dot" node representing the shrinked edge
+	succ.remove (dst)
+	pred.remove (src)
 	for p in pred:
-	    if p != src:
-		for s in succ:
-		    if s != dst:
-			c = ''
-			if 'label' in self[src][s]:
-			    if c:
-				c += '.'
-			    c += self[src][s]['label']
-			if 'label' in self[p][dst]:
-			    if c:
-				c += '.'
-			    c += self[p][dst]['label']
-			if self.has_edge (p, s):
-			    c += '#'
-			    if 'label' in self[p][s]:
-				c += self[p][s]['label']
-			    else:
-				c += '1'
-			if c:
-			    self.bound_with (p, s, c)
-			else:
-			    self.bound (p, s)
+	    for s in succ:
+		c1 = self.get_coef (src, s)
+		c2 = self.get_coef (p, dst)
+		c3 = self.get_coef (p, s)
+		c = str(c1) + ' ' + str(c2) + ' *'
+		if c3:
+		    c += ' ' + c3 + ' +'
+		self.bound_with (p, s, c)
 	self.remove_node (src)
 	self.remove_node (dst)
 
     def reduce (self):
-        cont = True
-        while (cont):
-            cont = False
-            for n in self.nodes_iter():             # for each node
-		for s in self.successors(n):	    # for each sucessor of n
-		    if self.is_invertible(n,s):	    # if the edge is invertible
-			self.shrink_edge(n,s)	    # shrink that edge to a point
-			return
+	for n in self.nodes_iter():             # for each node
+	    for s in self.successors(n):	    # for each sucessor of n
+		if self.is_invertible(n,s):	    # if the edge is invertible
+		    self.shrink_edge(n,s)	    # shrink that edge to a point
+		    return
 	
     def meaningful_sum (self, s):
         for t in s:		                    # for each term in this sum
