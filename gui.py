@@ -77,7 +77,7 @@ class Viewer(wx.App):
 			    self.H.bound_with (name, v.strip(), scalar=s.strip())
 			else:
 			    self.H.bound (name, t.strip())
-		    self.onView()
+            self.onView()
         else:
             src, sep, line = cmd.partition('~')
             if '~' == sep:

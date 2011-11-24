@@ -82,9 +82,6 @@ class HomComplex(nx.DiGraph):
                 ss.append (y)
         return ss
                 
-    def show(self):
-        nx.draw(self)
-
     def clean(self):
         self.clear()
         self.L_dict.clear()
@@ -279,6 +276,11 @@ class HomComplex(nx.DiGraph):
 
     def draw_png (self, filename):
         A = nx.to_agraph(self)
+        legend  = '<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">'
+        for k, v in self.color_map.items():
+            legend += '<TR><TD BGCOLOR="' + v + '">' + k + '</TD></TR>'
+        legend += '</TABLE>>'
+        A.add_node(1, shape="plaintext", label=legend)
         A.layout(prog='dot')
         A.draw(filename)
 
