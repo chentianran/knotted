@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import wx
 import threading
@@ -5,8 +7,8 @@ import threading
 from mathtex.mathtex_main import Mathtex
 from mathtex.fonts import BakomaFonts
 
-from homformat  import *
-from homcomplex import *
+from homformat import *
+from homutils import *
 
 class Viewer(wx.App):
     def __init__(self, redirect=False, filename=None):
@@ -16,7 +18,7 @@ class Viewer(wx.App):
  
         self.createWidgets()
 
-        self.H = HomComplex()
+        self.creator = ComplexCreator()
         self.mathfont = BakomaFonts()
         self.result_tex = ''
 
@@ -49,52 +51,37 @@ class Viewer(wx.App):
     def onCmd(self, event):
         cmd = self.cmd_input.GetValue().strip()
         if 'ker' == cmd:
-            self.result_tex = r'$Ker=' + set2tex(self.H.ker()) + '$'
+            ker = self.creator.C.ker()
+            self.result_tex = r'$Ker=' + set2tex(ker) + '$'
             self.onResult()
 
         elif 'img' == cmd:
-            self.result_tex = r'$Im=' + set2tex(self.H.img()) + '$'
+            img = self.creator.C.img()
+            self.result_tex = r'$Im=' + set2tex(img) + '$'
             self.onResult()
 
         elif 'hom' == cmd:
-            ker, img = self.H.hom()
+            ker, img = self.creator.C.hom()
             self.result_tex = hom2tex (ker, img)
             self.onResult()
 
 	elif 'reduce' == cmd:
-	    self.H.reduce()
+	    self.creator.C.reduce()
 	    self.onView()
 	    
 	elif 'read' == cmd:
 	    for line in open('input','r').readlines():
-		src, sep, val = line.partition('~')
-		if '~' == sep:
-		    name = src.strip()
-		    terms = val.split('+')
-		    for t in terms:
-			s, sep, v = t.partition('*')
-			if '*' == sep:
-			    self.H.bound_with (name, v.strip(), scalar=s.strip())
-			else:
-			    self.H.bound (name, t.strip())
+                self.creator.execute (line)
             self.onView()
+
         else:
-            src, sep, line = cmd.partition('~')
-            if '~' == sep:
-                name = src.strip()
-                terms = line.split('+')
-                for t in terms:
-                    s, sep, v = t.partition('*')
-                    if '*' == sep:
-                        self.H.bound_with (name, v.strip(), scalar=s.strip())
-                    else:
-                        self.H.bound (name, t.strip())
+            if self.creator.execute (cmd):
                 self.onView()
 
         self.cmd_input.SetValue('')
 
     def onView(self):
-        self.H.draw_png('hom.png')
+        self.creator.C.draw_png('hom.png')
         filepath = "hom.png"
         img = wx.Image(filepath, wx.BITMAP_TYPE_ANY)
         W = img.GetWidth()
