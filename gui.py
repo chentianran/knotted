@@ -8,7 +8,8 @@ from mathtex.mathtex_main import Mathtex
 from mathtex.fonts import BakomaFonts
 
 from homformat import *
-from homutils import *
+from homutils  import *
+from homplot   import *
 
 class Viewer(wx.App):
     def __init__(self, redirect=False, filename=None):
@@ -81,7 +82,8 @@ class Viewer(wx.App):
         self.cmd_input.SetValue('')
 
     def onView(self):
-        self.creator.C.draw_png('hom.png')
+        plotter = ComplexPlot (self.creator.C)
+        plotter.draw_png('hom.png')
         filepath = "hom.png"
         img = wx.Image(filepath, wx.BITMAP_TYPE_ANY)
         W = img.GetWidth()

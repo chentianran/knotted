@@ -1,8 +1,5 @@
-import matplotlib.pyplot as plt
 import networkx as nx
-import itertools as iter
 from string import *
-from numpy import *
 
 
 class Scale:
@@ -16,26 +13,15 @@ class Complex (nx.DiGraph):
 
     def __init__ (self, data=None):
         nx.DiGraph.__init__(self, data)
-        self.color_use = ['yellow', 'orange', 'pink', 'blue','green','red']
-        self.color_map = {1:'black'}
-
-    def scalar_color (self, s):
-        if s in self.color_map:
-            return self.color_map[s]
-        else:
-	    if len(self.color_use) > 0:
-		color = self.color_use.pop()
-		self.color_map[s] = color
-		return color
-	    else:
-		return 'gray'
+        #self.color_use = ['yellow', 'orange', 'pink', 'blue','green','red']
+        #self.color_map = {1:'black'}
 
     def bound(self, x, y, coef=1):
         self.add_node(x)
         self.add_node(y)
         self.add_edge(x,y)
         self[x][y]['coef'] = coef
-        self[x][y]['color'] = self.scalar_color(coef)
+        #self[x][y]['color'] = self.scalar_color(coef)
 
     def get_coef (self, src, dst):
 	if self.has_edge (src, dst):
@@ -77,14 +63,14 @@ class Complex (nx.DiGraph):
 		    return True
         return False
 	
-    def draw_png (self, filename):
-        A = nx.to_agraph(self)
-        legend  = '<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">'
-        for k, v in self.color_map.items():
-            if 1 != k:
-                legend += '<TR><TD BGCOLOR="' + v + '"></TD><TD>' + k + '</TD></TR>'
-        legend += '</TABLE>>'
-        A.add_node(1, shape="plaintext", label=legend)
-        A.layout(prog='dot')
-        A.draw(filename)
+    #def draw_png (self, filename):
+    #    A = nx.to_agraph(self)
+    #    legend  = '<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">'
+    #    for k, v in self.color_map.items():
+    #        if 1 != k:
+    #            legend += '<TR><TD BGCOLOR="' + v + '"></TD><TD>' + k + '</TD></TR>'
+    #    legend += '</TABLE>>'
+    #    A.add_node(1, shape="plaintext", label=legend)
+    #    A.layout(prog='dot')
+    #    A.draw(filename)
 

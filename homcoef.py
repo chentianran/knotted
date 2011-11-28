@@ -1,4 +1,5 @@
 from itertools import *
+from string import *
 
 class Prod (list):
 
@@ -66,6 +67,8 @@ def coef_add(x,y):
     return reduce_sum(r)
 
 def reduce_coef (coef):
+    if 1 == coef:
+        return str(1)
     stack = []
     for x in coef.split():
         if '*' == x:
@@ -78,4 +81,11 @@ def reduce_coef (coef):
             stack.append(x)
     return stack[-1]
 
+def coef_to_str (coef):
+    if isinstance(coef,Sum):
+        return join (map (coef_to_str, coef), ' + ')
+    elif isinstance(coef,Prod):
+        return join (coef, '')
+    else:
+        return coef
 
