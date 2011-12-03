@@ -1,0 +1,32 @@
+ydz ~ ycz + v*yaz + ydy + xdz + v*zdz
+ybz ~ ycz + u*yaz + yby + xbz + v*zbz
+ydx ~ u*ydy + ycx + v*yax + xdx + v*zdx
+ybx ~ xbx + v*zbx + u*yby + ycx + u*yax
+ycz ~ xcz + v*zcz + ycy 
+yaz ~ xaz + v*zaz + yay
+ydy ~ ycy + v*yay + xdy + v*zdy
+xbx ~ u*xby + xcx + u*xax
+zbx ~ u*zby + u*zax + zcx
+yby ~ xby + v*zby + u*yay + ycy
+ycx ~ xcx + v*zcx + u*ycy 
+yax ~ u*yay + xax + v*zax
+xdz ~ xdy + v*xaz + xcz
+zdz ~ v*zaz + zcz + zdy
+xbz ~ xby + u*xaz + xcz
+zbz ~ u*zaz + zcz + zby
+xdx ~ v*xax + xcx + u*xdy
+zdx ~ v*zax + zcx + u*zdy
+zax ~ u*zay
+xax ~ u*xay
+zcx ~ u*zcy
+xcx ~ u*xcy
+zby ~ u*zay + zcy
+xby ~ u*xay + xcy
+zdy ~ v*zay + zcy
+xdy ~ v*xay + xcy
+yay ~ xay + v*zay
+ycy ~ xcy + v*zcy
+zaz ~ zay
+xaz ~ xay
+zcz ~ zcy
+xcz ~ xcy
