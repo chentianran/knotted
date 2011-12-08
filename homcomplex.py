@@ -31,6 +31,10 @@ class Complex (nx.DiGraph):
 		return 1
 	return None
 	
+    def set_coef (self, src, dst, coef):
+	assert self.has_edge (src, dst)
+	self[src][dst]['coef'] = coef
+	
     def is_terminal (self, x):
         return self.out_degree(x) == 0
         
