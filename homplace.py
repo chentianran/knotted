@@ -5,6 +5,7 @@ import itertools
 
 from homutils import *
 from homplot  import *
+from texhelp  import *
 
 creator = ComplexCreator()
 
@@ -72,42 +73,27 @@ for g in generators:
     name = ''.join(g)
     vertices[name] = val
 
-gen_dec = [(tuple(val),n) for n, val in vertices.iteritems()]
-gen_dec.sort (reverse=True)
-#print gen_dec
-
-print '\\documentclass{article}'
-print '\\usepackage{tikz}'
-print '\\begin{document}'
+### print the generator table ###
+doc = TexDoc (sys.stdout)
+doc.begin()
 
 gen_cols = list(set([v[0] for n, v in vertices.iteritems()]))
 gen_rows = list(set([v[1] for n, v in vertices.iteritems()]))
-
-print '\\begin{tabular}{|l|' + '|'.join(['c' for x in gen_cols]) + '|}'
-print '\hline & ' + ' & '.join( ['$' + str(x) + '$' for x in sorted(gen_cols)] ) + '\\\\ \hline'
+gen_tab  = [ [''] + ['$' + str(x) + '$' for x in sorted(gen_cols) ] ]
 
 for r_coord in sorted (gen_rows, reverse=True):
-    print r_coord
+    row = [ str(r_coord) ]
     for c_coord in sorted (gen_cols):
 	gs = []
 	for n, v in vertices.iteritems():
 	    if v[0] == c_coord and v[1] == r_coord:
 		gs.append(n)
-	print ' & $' + ','.join(gs) + '$'
+	row.append ('$' + ','.join(gs) + '$')
+    gen_tab.append (row)
 
+doc.table (gen_tab)
+doc.end()
     
-    print '\\\\ \hline'
-print '\\end{tabular}'
-print '\\end{document}'
-
-c1_coord = gen_dec[0][0]
-c1_row = []
-for d in gen_dec:
-    if d[0][0] == c1_coord[0]:
-	c1_row.append (d[1])
-
-#print c1_row
-
 gen_rows_s = sorted(gen_rows,reverse=True)
 r0 = gen_rows_s[0]
 r1 = gen_rows_s[1]
@@ -132,9 +118,6 @@ for src, dst in new_cpx.edges_iter():
 plotter = ComplexPlot (new_cpx)
 plotter.draw_png('complex1' + '.png')
 
-#print groups
-#print generators
-#print vertices
 
 
     
