@@ -1,9 +1,9 @@
 import sys
 import copy
 import numpy
-#import itertools
 
 from homutils import *
+from homtrans import *
 from homplot  import *
 from texhelp  import *
 
@@ -100,14 +100,7 @@ for n, v in vertices.iteritems():
 print 'row0', row0
 print 'row1', row1
 new_cpx = copy.deepcopy (creator.C)
-for src, dst in new_cpx.edges_iter():
-    if (src in row0 and dst in row1) or (src in row1 and dst in row0):
-	coef = new_cpx.get_coef (src, dst)
-	new_cpx.set_coef (src, dst, coef[::-1])
-	print src, dst, coef, coef[::-1]
+flip_edges (new_cpx, row0, row1)
 plotter = ComplexPlot (new_cpx)
 plotter.draw_png('complex1' + '.png')
 
-
-
-    
