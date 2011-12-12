@@ -1,3 +1,5 @@
+import itertools
+
 from homcomplex import *
 
 class ComplexCreator:
@@ -25,4 +27,18 @@ class ComplexCreator:
                         self.C.bound (name, t.strip())
                 return True
         return False
+
+def cartesian_prod (gen):
+    result = []
+    for g in gen:
+	if not result:
+	    result = g
+	else:
+	    new_gen = []
+	    for p, x in itertools.product (result, g):
+		new_p = list(p)
+		new_p.append(x)
+		new_gen.append (new_p)
+	    result = new_gen
+    return result
 

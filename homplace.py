@@ -1,7 +1,7 @@
 import sys
 import copy
 import numpy
-import itertools
+#import itertools
 
 from homutils import *
 from homplot  import *
@@ -20,7 +20,7 @@ for line in sys.stdin.readlines():
     if ':' == sep:
 	p = p.strip()		# name of the point
 	c = c.strip()		# coordinate string of the point
-	points [p] = numpy.fromstring(c, sep=',')
+	points[p] = numpy.fromstring(c, sep=',')
     else:
 	lst = line.split()
 	if lst:
@@ -38,17 +38,7 @@ for line in sys.stdin.readlines():
 	    print 'Sorry, I did not understand the command:'
 	    print line
 
-### enumerate the generators ###
-for g in groups:
-    if not generators:
-        generators = g
-    else:
-        new_gen = []
-        for p, x in itertools.product (generators, g):
-            new_p = list(p)
-            new_p.append(x)
-            new_gen.append (new_p)
-        generators = new_gen
+generators = cartesian_prod (groups)	    # enumerate the generators
 
 ### generate the first complex ###
 for g in generators:
