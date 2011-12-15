@@ -84,23 +84,46 @@ for r_coord in sorted (gen_rows, reverse=True):
 doc.table (gen_tab)
 doc.end()
     
-gen_rows_s = sorted(gen_rows,reverse=True)
-r0 = gen_rows_s[0]
-r1 = gen_rows_s[1]
 plotter = ComplexPlot (creator.C)
-plotter.draw_png('complex0' + '.png')
-row0 = set()
-row1 = set()
-for n, v in vertices.iteritems():
-    if v[1] == r0:
-	row0.add (n)
-    elif v[1] == r1:
-	row1.add (n)
+plotter.draw_png('complex-0' + '.png')
 
-print 'row0', row0
-print 'row1', row1
-new_cpx = copy.deepcopy (creator.C)
-flip_edges (new_cpx, row0, row1)
-plotter = ComplexPlot (new_cpx)
-plotter.draw_png('complex1' + '.png')
+gen_rows_s = sorted(gen_rows,reverse=True)
+gen_cols_s = sorted(gen_cols,reverse=True)
+
+row_seed = [creator.C]
+
+for k in range(1,len(gen_rows_s)):
+    r0 = gen_rows_s[k-1]
+    r1 = gen_rows_s[k]
+    row0 = set()
+    row1 = set()
+    for n, v in vertices.iteritems():
+	if v[1] == r0:
+	    row0.add (n)
+	elif v[1] == r1:
+	    row1.add (n)
+
+    new_cpx = copy.deepcopy (row_seed[k-1])
+    flip_edges (new_cpx, row0, row1)
+    plotter = ComplexPlot (new_cpx)
+    plotter.draw_png('complex-' + str(k) + '.png')
+    row_seed.append (new_cpx)
+    
+for i in range(0,len(row_seed)):	    # for each row
+    C_from = row_seed[i]		    # start from the row seed
+    for j in range(1,len(gen_cols_s)):	    # foreach column after the initial column
+	col0 = set()
+	col1 = set()
+	for n, v in vertices.iteritems():
+	    if   v[0] == gen_cols_s[j-1]:
+		col0.add (n)
+	    elif v[0] == gen_cols_s[j]:
+		col1.add (n)
+	C_to = copy.deepcopy (C_from)
+	flip_edges (C_to, col0, col1)
+	C_trim = copy.deepcopy (C_to)
+	trim_edges (C_trim)
+	plotter = ComplexPlot (C_trim)
+	plotter.draw_png('complex-' + str(i) + '-' + str(j) + '.png')
+	C_from = C_to			    # the next one start from here
 

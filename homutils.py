@@ -41,3 +41,4 @@ def cartesian_prod (gen):
 		new_gen.append (new_p)
 	    result = new_gen
     return result
+
