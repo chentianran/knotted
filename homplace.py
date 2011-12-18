@@ -63,14 +63,14 @@ for g in generators:
     name = ''.join(g)
     vertices[name] = val
 
+gen_cols = list(set([v[0] for n, v in vertices.iteritems()]))
+gen_rows = list(set([v[1] for n, v in vertices.iteritems()]))
+
 ### print the generator table ###
 doc = TexDoc (sys.stdout)
 doc.begin()
 
-gen_cols = list(set([v[0] for n, v in vertices.iteritems()]))
-gen_rows = list(set([v[1] for n, v in vertices.iteritems()]))
 gen_tab  = [ [''] + ['$' + str(x) + '$' for x in sorted(gen_cols) ] ]
-
 for r_coord in sorted (gen_rows, reverse=True):
     row = [ str(r_coord) ]
     for c_coord in sorted (gen_cols):
@@ -84,14 +84,10 @@ for r_coord in sorted (gen_rows, reverse=True):
 doc.table (gen_tab)
 doc.end()
     
-plotter = ComplexPlot (creator.C)
-plotter.draw_png('complex-0' + '.png')
-
 gen_rows_s = sorted(gen_rows,reverse=True)
 gen_cols_s = sorted(gen_cols,reverse=True)
 
-row_seed = [creator.C]
-
+row_seeds = [creator.C]
 for k in range(1,len(gen_rows_s)):
     r0 = gen_rows_s[k-1]
     r1 = gen_rows_s[k]
@@ -102,16 +98,14 @@ for k in range(1,len(gen_rows_s)):
 	    row0.add (n)
 	elif v[1] == r1:
 	    row1.add (n)
-
-    new_cpx = copy.deepcopy (row_seed[k-1])
-    flip_edges (new_cpx, row0, row1)
-    plotter = ComplexPlot (new_cpx)
-    plotter.draw_png('complex-' + str(k) + '.png')
-    row_seed.append (new_cpx)
+    C = copy.deepcopy (row_seeds[k-1])
+    flip_edges (C, row0, row1)
+    row_seeds.append (C)
     
-for i in range(0,len(row_seed)):	    # for each row
-    C_from = row_seed[i]		    # start from the row seed
-    for j in range(1,len(gen_cols_s)):	    # foreach column after the initial column
+### Form the complices table by transformation ##########################################
+cpx_tab = [ [s] for s in row_seeds ]		# table of complices
+for cpx_row in cpx_tab:				# for each row of complices
+    for j in range(1,len(gen_cols_s)):		# foreach column after the initial column
 	col0 = set()
 	col1 = set()
 	for n, v in vertices.iteritems():
@@ -119,11 +113,18 @@ for i in range(0,len(row_seed)):	    # for each row
 		col0.add (n)
 	    elif v[0] == gen_cols_s[j]:
 		col1.add (n)
-	C_to = copy.deepcopy (C_from)
-	flip_edges (C_to, col0, col1)
-	C_trim = copy.deepcopy (C_to)
-	trim_edges (C_trim)
-	plotter = ComplexPlot (C_trim)
-	plotter.draw_png('complex-' + str(i) + '-' + str(j) + '.png')
-	C_from = C_to			    # the next one start from here
+	C = copy.deepcopy (cpx_row[0])		# make a copy of the complex on the righthand column
+	flip_edges (C, col0, col1)		# flip the edges
+	cpx_row.insert (0, C)			# save it to the begining of the row
 
+### Trim edges and plot complices ######################################################
+for i in range(0,len(cpx_tab)):			# for each row
+    for j in range(0,len(cpx_tab[i])):		# for each column
+	C = cpx_tab[i][j]			# get the complex index (i,j)
+	trim_edges (C)
+	name  = 'complex-'
+	name += str(i) + '-' + str(j)
+	name += '.png'
+	plotter = ComplexPlot (C)
+	plotter.draw_png (name)
+	
