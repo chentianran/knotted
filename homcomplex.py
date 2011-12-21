@@ -13,15 +13,12 @@ class Complex (nx.DiGraph):
 
     def __init__ (self, data=None):
         nx.DiGraph.__init__(self, data)
-        #self.color_use = ['yellow', 'orange', 'pink', 'blue','green','red']
-        #self.color_map = {1:'black'}
 
     def bound(self, x, y, coef=1):
         self.add_node(x)
         self.add_node(y)
         self.add_edge(x,y)
         self[x][y]['coef'] = coef
-        #self[x][y]['color'] = self.scalar_color(coef)
 
     def get_coef (self, src, dst):
 	if self.has_edge (src, dst):
@@ -39,7 +36,12 @@ class Complex (nx.DiGraph):
         return self.out_degree(x) == 0
         
     def is_invertible (self, src, dst):
-        return (1 == self.get_coef (src, dst))
+	c = self.get_coef (src, dst)
+        if 1 == c or '1' == c:
+	    return True
+	else:
+	    return False
+	
 
     def shrink_edge (self, src, dst):
 	dot  = str(src) + '-' + str(dst)	    # the new "dot" node representing the shrinked edge
@@ -67,14 +69,3 @@ class Complex (nx.DiGraph):
 		    return True
         return False
 	
-    #def draw_png (self, filename):
-    #    A = nx.to_agraph(self)
-    #    legend  = '<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">'
-    #    for k, v in self.color_map.items():
-    #        if 1 != k:
-    #            legend += '<TR><TD BGCOLOR="' + v + '"></TD><TD>' + k + '</TD></TR>'
-    #    legend += '</TABLE>>'
-    #    A.add_node(1, shape="plaintext", label=legend)
-    #    A.layout(prog='dot')
-    #    A.draw(filename)
-

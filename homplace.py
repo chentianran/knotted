@@ -122,9 +122,11 @@ for i in range(0,len(cpx_tab)):			# for each row
     for j in range(0,len(cpx_tab[i])):		# for each column
 	C = cpx_tab[i][j]			# get the complex index (i,j)
 	trim_edges (C)
-	name  = 'complex-'
-	name += str(i) + '-' + str(j)
-	name += '.png'
-	plotter = ComplexPlot (C)
-	plotter.draw_png (name)
+	prefix = '-'.join(['complex',str(i),str(j)])
+	for k in range(0,100):
+	    plotter = ComplexPlot (C)
+	    name = prefix + '-r' + str(k)
+	    plotter.draw_png (name + '.png')
+	    if not C.reduce():
+		break
 	
