@@ -30,8 +30,9 @@ class ComplexPlot:
             coef = self.C.get_coef (src, dst)
             cstr = coef_to_str (reduce_coef (coef))
             self.C[src][dst]['color'] = self.get_color (cstr)
-            if '1' != cstr:
-                used_coef.add (cstr)
+            #if '1' != cstr:
+            #    used_coef.add (cstr)
+            used_coef.add (cstr)
 
         A = nx.to_agraph(self.C)
         legend  = '<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0">'

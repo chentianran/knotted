@@ -13,6 +13,8 @@ def trim_edges (C):
     for src, dst in C.edges_iter():
 	coef = C.get_coef (src, dst)
 	first, sep, second = coef.partition('|')
+	#assert len(first) == 1
+	#assert len(second) == 1
 	if '|' == sep:
 	    C.set_coef (src, dst, first)
     

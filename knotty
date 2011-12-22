@@ -1,0 +1,11 @@
+#!/bin/bash
+
+python homplace.py > gen_table.tex
+pdflatex gen_table.tex
+zip $1 gen_table.pdf complex-*.png
+rm -f gen_table.tex
+rm -f gen_table.aux
+rm -f gen_table.log
+rm -f gen_table.pdf
+rm -f complex-*.png
+

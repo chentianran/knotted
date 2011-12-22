@@ -1,6 +1,7 @@
 import networkx as nx
 from string import *
 
+from homcoef import *
 
 class Scale:
 
@@ -30,7 +31,10 @@ class Complex (nx.DiGraph):
 	
     def set_coef (self, src, dst, coef):
 	assert self.has_edge (src, dst)
-	self[src][dst]['coef'] = coef
+	if '1' == coef:
+	    self[src][dst]['coef'] = 1
+	else:
+	    self[src][dst]['coef'] = coef
 	
     def is_terminal (self, x):
         return self.out_degree(x) == 0
@@ -54,18 +58,25 @@ class Complex (nx.DiGraph):
 		c1 = self.get_coef (src, s)
 		c2 = self.get_coef (p, dst)
 		c3 = self.get_coef (p, s)
-		c = str(c1) + ' ' + str(c2) + ' *'
+
+		if 1 == c1:
+		    c = c2
+		elif 1 == c2:
+		    c = c1
+		else:
+		    c = c1 + ' ' + c2 + ' *'
+
 		if c3:
-		    c += ' ' + c3 + ' +'
+		    c = str(c) + ' ' + str(c3) + ' +'
 		self.bound (p, s, coef=c)
+
 	self.remove_node (src)
 	self.remove_node (dst)
 
     def reduce (self):
-	for n in self.nodes_iter():                 # for each node
-	    for s in self.successors(n):	    # for each sucessor of n
-		if self.is_invertible(n,s):	    # if the edge is invertible
-		    self.shrink_edge(n,s)	    # shrink that edge to a point
-		    return True
+	for src, dst in self.edges_iter():	    # for each edge
+	    if self.is_invertible (src, dst):	    # if the edge is invertible
+		self.shrink_edge (src,dst)	    # shrink that edge to a point
+		return True
         return False
 	
