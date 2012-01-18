@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+    <table>
+    {% for y in ys %}
+	{% set y_index = loop.index %}
+	<tr>
+	    {% for x in xs %}
+		{% set x_index = loop.index %}
+		<td> <a href="{{ url_for('view_complex',x=x_index,y=y_index) }}"> {{ x + ',' + y}} </a> </td>
+	    {% endfor %}
+	</tr>
+    {% endfor %}
+{% endblock %}
