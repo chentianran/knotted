@@ -36,9 +36,11 @@ def cartesian_prod (gen):
 	else:
 	    new_gen = []
 	    for p, x in itertools.product (result, g):
-		new_p = list(p)
-		new_p.append(x)
+		if isinstance (p, list):
+		    new_p = list(p)
+		    new_p.append(x)
+		else:
+		    new_p = [p,x]
 		new_gen.append (new_p)
 	    result = new_gen
     return result
-

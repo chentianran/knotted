@@ -19,10 +19,10 @@ class ComplexPlot:
         else:
 	    if len(self.color_use) > 0:
 		color = self.color_use.pop()
-		self.color_map[c] = color
-		return color
 	    else:
-		return 'gray'
+		color = 'gray'
+	    self.color_map[c] = color
+	    return color
 
     def draw_png (self, filename):
         used_coef = set()
