@@ -7,6 +7,8 @@ from homtrans import *
 from homplot  import *
 from texhelp  import *
 
+opt_draw_all = False
+
 creator = ComplexCreator()
 
 groups = []
@@ -123,10 +125,13 @@ for i in range(0,len(cpx_tab)):			# for each row
 	C = cpx_tab[i][j]			# get the complex index (i,j)
 	trim_edges (C)
 	prefix = '-'.join(['complex',str(i),str(j)])
-	for k in range(0,100):
-	    plotter = ComplexPlot (C)
-	    name = prefix + '-r' + str(k)
-	    plotter.draw_png (name + '.png')
+	for k in range(0,500):
+	    if opt_draw_all:
+		plotter = ComplexPlot (C)
+		name = prefix + '-r' + str(k)
+		plotter.draw_png (name + '.png')
 	    if not C.reduce():
+		p = ComplexPlot (C)
+		p.draw_png (prefix + '.png')	    # plot the end result
 		break
 	
